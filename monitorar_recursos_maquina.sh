@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Crie um único script para monitorar os recursos gerais do computador: CPU, memória, disco e rede, e constar a data e hora 
-# em que foi coletado. A coleta de dados precisa ser realizada a cada 5 segundos.
-
 monitorar_cpu()
 {
 	cpu_monitoramento=()
