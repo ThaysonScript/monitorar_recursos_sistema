@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
-monitorar_cpu()
+################################################################################################## SOBRE
+# Fazer o que: monitorar recursos gerais de uma maquina ou servidor
+# recursos: monitorar cpu, processos, memoria, disco, rede, registrar data e hora, fazer logs de registro e execuções do programa
+
+################################################################################################## VARIAVEIS GLOBAIS
+
+################################################################################################## FUNCOES
+MONITORAR_CPU()
 {
 	cpu_monitoramento=()
 
@@ -17,7 +24,7 @@ monitorar_cpu()
 	echo -e "${cpu_monitoramento[0]:0:65}\n${cpu_monitoramento[1]}\n${cpu_monitoramento[2]}"
 }
 
-monitorar_processos()
+MONITORAR_PROCESSOS()
 {
 	echo -e "\n--------------------------------------- PROCESSOS ------------------------------------------"
 	saida_processos_uso_memoria=$(top -n 1 -o RES -b | awk 'NR > 6 && $6 > 0 {res_mb = $6 / 1024; printf "%-8s %-10s %-5s %-5s %-8s %10.2fMB    %-10s %-5s %-5s %-5s %-10s %s\n", $1, $2, $3, $4, $5, res_mb, $7, $8, $9, $10, $11, $12}')
@@ -32,21 +39,21 @@ monitorar_processos()
     	fi
 }
 
-monitorar_memoria()
+MONITORAR_MEMORIA()
 {
 	echo -e "\n--------------------------------- MEMORIA MONITOR --------------------------------------"
 	uso_memoria=$(ps -eo pid,%mem,rss,cmd --sort=-%mem | awk '$3 > 0 {rss_mb = $3 / 1024; printf "%-5s %-5s %10.2fMB %s\n", $1, $2, rss_mb, $4}')
 	echo "$uso_memoria"
 }
 
-monitorar_disco()
+MONITORAR_DISCO()
 {
 	echo -e "\n--------------------------------- DISC MONITOR -----------------------------------------"
 	uso_disco=$(df -hT)
 	echo "$uso_disco"
 }
 
-monitorar_rede()
+MONITORAR_REDE()
 {
 	echo -e "\n--------------------------------- NETWORKING MONITOR -----------------------------------"
 	rede=$(ip addr show)
@@ -54,7 +61,7 @@ monitorar_rede()
 	echo -e "Rede: $rede\n\nRotas: $route"
 }
 
-registrar_data_hora()
+REGISTRAR_DATA_HORA()
 {
 	nome_dia=$( date +%A )
 	hora_minuto_segundo=$( date +%T )
@@ -66,16 +73,16 @@ registrar_data_hora()
 	echo -e "executado as $hora_minuto_segundo do dia $data\n---------------------------------------------------------------"
 }
 
-registrar_logs()
+REGISTRAR_LOGS()
 {
-	cpu=$1
-	processos=$2
-	memoria=$3
-	disco=$4
-	rede=$5
-	data=$6
+	local cpu=$1
+	local processos=$2
+	local memoria=$3
+	local disco=$4
+	local rede=$5
+	local data=$6
 
-	dados="$cpu\n$processos\n$memoria\n$disco\n$rede\n$data"
+	local dados="$cpu\n$processos\n$memoria\n$disco\n$rede\n$data"
 	[[ -f "logs/log.txt" ]] && arquivo_valido=0 || arquivo_valido=1
 
 	if [[ -d "logs" ]]; then
@@ -86,7 +93,7 @@ registrar_logs()
 	fi
 }
 
-registrar_execucoes()
+REGISTRAR_EXECUCOES()
 {
 	[[ -f "registros/execucoes.txt" ]] && arquivo_valido=0 || arquivo_valido=1
 
@@ -95,40 +102,41 @@ registrar_execucoes()
 	echo "${quantidade_execucoes: -2}"
 }
 
-limpar_logs()
+LIMPAR_LOGS()
 {
-	execucoes=$(registrar_execucoes)
+	local execucoes=$(registrar_execucoes)
 
 	if [[ "$execucoes" -ge 5 ]]; then
-		monitores="logs/log.txt"
-		quantidade="executado"
-		ocorrencia=$(grep -c "$quantidade" "$monitores")
+		local monitores="logs/log.txt"
+		local quantidade="executado"
+		local ocorrencia=$(grep -c "$quantidade" "$monitores")
 
 		[[ "$ocorrencia" -eq 10 ]] && echo "precisa fazer limpeza de logs" || echo "nao precisa de limpeza: $ocorrencia"
 	fi
 }
 
-main()
+################################################################################################## PROGRAMA PRINCIPAL
+MAIN()
 {
-	registros=0
+	local registros=0
 
 	clear
 	while true; do
 		echo "Iniciando monitoramento de recursos do sistema, pressione (ctrl + c) para sair!"
 
-		monitorar_cpu && cpu=$(monitorar_cpu)
+		MONITORAR_CPU && cpu=$(MONITORAR_CPU)
 
-		monitorar_processos && processos=$(monitorar_processos)
+		MONITORAR_PROCESSOS && processos=$(MONITORAR_PROCESSOS)
 
-		monitorar_memoria && memoria=$(monitorar_memoria)
+		MONITORAR_MEMORIA && memoria=$(MONITORAR_MEMORIA)
 
-		monitorar_disco && disco=$(monitorar_disco)
+		MONITORAR_DISCO && disco=$(MONITORAR_DISCO)
 
-		monitorar_rede && rede=$(monitorar_rede)
+		MONITORAR_REDE && rede=$(MONITORAR_REDE)
 
-		registrar_data_hora && data=$(registrar_data_hora)
+		REGISTRAR_DATA_HORA && data=$(REGISTRAR_DATA_HORA)
 
-		registrar_logs "$cpu $processos $memoria $disco $rede $data"
+		REGISTRAR_LOGS "$cpu $processos $memoria $disco $rede $data"
 
 		[[ -f "registros/execucoes.txt" ]] && quantidade_execucoes=$( cat registros/execucoes.txt )
 
@@ -149,8 +157,8 @@ main()
 			echo "$registros" > registros/execucoes.txt
 		fi
 
-		registrar_execucoes
-		limpar_logs
+		REGISTRAR_EXECUCOES
+		LIMPAR_LOGS
 
 		sleep 5
 		clear
@@ -158,4 +166,4 @@ main()
 
 }
 
-main
+MAIN
